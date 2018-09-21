@@ -1,1 +1,1 @@
-# Short example of estimating a Dirichlet process Gaussian mixture model (DPGMM) with variational inference in TensorFlow
+# Self-contained example of a Dirichlet process Gaussian mixture model (DPGMM) trained with variational inference in TensorFlow
