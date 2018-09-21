@@ -141,7 +141,7 @@ plt.close()
 
 # Plot histogram of real and generated data
 plt.hist(data, bins=100, normed=1, color='blue', alpha=0.5, label='real data')
-plt.hist(np.sort(gen_data)[100:99900], bins=100, normed=1, color='red', alpha=0.5, label='generated data') # drop some of the tails
+plt.hist(np.sort(gen_data)[100:99900], bins=100, normed=1, color='red', alpha=0.5, label='generated data') # drop the 0.1% tails
 plt.legend(loc='upper right')
 plt.savefig('histogram.png')
 plt.close()
