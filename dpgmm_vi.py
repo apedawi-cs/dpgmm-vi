@@ -47,12 +47,12 @@ q_parms_dict = {
     }
 }
 
-# Specify p(theta), p(mu), and p(tau)
+# Specify the prior distributions p(theta), p(mu), and p(tau)
 p_theta = tfd.Beta(concentration1=1., concentration0=0.01)
 p_mu = tfd.Normal(loc=0., scale=100.)
 p_tau = tfd.Gamma(concentration=0.001, rate=0.001)
 
-# Specify q(theta), q(mu), and q(tau)
+# Specify the variational distributions q(theta), q(mu), and q(tau)
 q_theta = tfd.Beta(
     concentration1=tf.nn.softplus(q_parms_dict['theta']['concentration1_preact']),
     concentration0=tf.nn.softplus(q_parms_dict['theta']['concentration0_preact'])
@@ -70,7 +70,7 @@ q_tau = [
     ) for k in range(K)
 ]
 
-# Specify the likelihood p(x|...) under monte carlo draws from q(theta), q(mu), and q(tau)
+# Specify the likelihood distribution p(x|...) under monte carlo draws from q(theta), q(mu), and q(tau)
 theta = q_theta.sample(nb_mc_samps)
 pi = [theta[:, k] * tf.reduce_prod(1. - theta[:, :k], axis=1) for k in range(K - 1)]
 pi += [1. - tf.reduce_sum(pi, axis=0)]
