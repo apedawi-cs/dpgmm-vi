@@ -88,8 +88,8 @@ q_z = [
     ) for k in range(K)
 ]
 
-# Specify variational distribution for x
-q_x = tfd.Mixture(
+# Specify likelihood
+p_x = tfd.Mixture(
     cat=tfd.Categorical(probs=pi),
     components=q_z
 )
@@ -98,7 +98,7 @@ q_x = tfd.Mixture(
 p_dict = {'theta': p_theta, 'mu': p_mu, 'tau': p_tau}
 q_dict = {'theta': [q_theta], 'mu': q_mu, 'tau': q_tau}
 pq_pairs = zip(p_dict.values(), q_dict.values())
-ll_avg = tf.reduce_mean(q_x.log_prob(x[:, tf.newaxis]))
+ll_avg = tf.reduce_mean(p_x.log_prob(x[:, tf.newaxis]))
 kld_qp = tf.reduce_sum([tf.reduce_sum([tfd.kl_divergence(_q, p) for _q in q]) for p, q in pq_pairs])
 elbo = nb_data_samps * ll_avg - kld_qp
 
