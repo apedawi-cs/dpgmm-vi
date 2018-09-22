@@ -70,7 +70,7 @@ q_tau = [
     ) for k in range(K)
 ]
 
-# Specify the likelihood p(x | k, mu, tau) under monte carlo draws from q(theta), q(mu), and q(tau)
+# Specify the likelihood p(x|...) under monte carlo draws from q(theta), q(mu), and q(tau)
 theta = q_theta.sample(nb_mc_samps)
 pi = [theta[:, k] * tf.reduce_prod(1. - theta[:, :k], axis=1) for k in range(K - 1)]
 pi += [1. - tf.reduce_sum(pi, axis=0)]
