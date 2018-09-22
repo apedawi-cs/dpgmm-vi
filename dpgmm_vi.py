@@ -74,9 +74,8 @@ q_tau = [
 theta = q_theta.sample(nb_mc_samps)
 pi = [theta[:, k] * tf.reduce_prod(1. - theta[:, :k], axis=1) for k in range(K - 1)]
 pi += [1. - tf.reduce_sum(pi, axis=0)]
-pi = tf.transpose(tf.stack(pi))
 p_x = tfd.Mixture(
-    cat=tfd.Categorical(probs=pi),
+    cat=tfd.Categorical(probs=tf.transpose(tf.stack(pi))),
     components=[
         tfd.Normal(
             loc=q_mu[k].sample(nb_mc_samps),
