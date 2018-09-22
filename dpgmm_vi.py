@@ -4,7 +4,7 @@ import sys
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-# Set seeds
+# Set random seeds
 np.random.seed(100)
 tf.set_random_seed(100)
 
@@ -28,10 +28,10 @@ nb_data_samps = tf.placeholder(tf.float32, [])
 nb_mc_samps = tf.placeholder(tf.int32, [])
 learning_rate = tf.placeholder(tf.float32, [])
 
-# Specify truncation hyperparameter for variational distribution
+# Specify the truncation hyperparameter for the variational approximation
 K = 100
 
-# Instantiate/initialize variational parameters
+# Instantiate/initialize the variational parameters
 q_parms_dict = {
     'theta': {
         'concentration1_preact': tf.Variable(softplus_inverse(init([K - 1], loc=1., scale=0.))),
@@ -93,7 +93,7 @@ ll_avg = tf.reduce_mean(p_x.log_prob(x[:, tf.newaxis]))
 kld_qp = tf.reduce_sum([tf.reduce_sum([tfd.kl_divergence(_q, p) for _q in q]) for p, q in pq_pairs])
 elbo = nb_data_samps * ll_avg - kld_qp
 
-# Set up optimizer
+# Set up the optimizer
 opt = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(
     loss=-elbo,
     var_list=[i.values() for i in q_parms_dict.values()]
@@ -122,7 +122,7 @@ with tf.Session() as session:
             sys.stdout.write('Iteration {}/{}. ELBO: {}.\n'.format(iteration + 1, nb_iterations, _elbo))
     gen_data = session.run(q_x.sample(), {nb_mc_samps: nb_obs})
 
-# Plot ELBO by iteration
+# Plot the ELBO by iteration
 plt.plot(elbo_list, color='lightgray')
 plt.plot(range(49, nb_iterations), np.convolve(elbo_list, 50 * [1. / 50], mode='valid'), color='black')
 plt.xlabel('Iteration')
@@ -130,7 +130,7 @@ plt.ylabel('ELBO')
 plt.savefig('elbo_curve.png')
 plt.close()
 
-# Plot histogram of real and generated data
+# Plot a histogram of real and generated data
 plt.hist(data, bins=100, normed=1, color='blue', alpha=0.5, label='real data')
 plt.hist(np.sort(gen_data)[100:99900], bins=100, normed=1, color='red', alpha=0.5, label='generated data') # drop the 0.1% tails
 plt.legend(loc='upper right')
