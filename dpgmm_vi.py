@@ -47,26 +47,16 @@ q_parms_dict = {
     }
 }
 
-# Specify prior on theta, which governs mixture assignments
+# Specify p(theta), p(mu), and p(tau)
 p_theta = tfd.Beta(concentration1=1., concentration0=0.01)
-
-# Specify prior on the base
 p_mu = tfd.Normal(loc=0., scale=100.)
 p_tau = tfd.Gamma(concentration=0.001, rate=0.001)
 
-# Specify variational distribution corresponding to theta
+# Specify q(theta), q(mu), and q(tau)
 q_theta = tfd.Beta(
     concentration1=tf.nn.softplus(q_parms_dict['theta']['concentration1_preact']),
     concentration0=tf.nn.softplus(q_parms_dict['theta']['concentration0_preact'])
 )
-
-# Draw samples from a truncated generalized stick breaking process [https://projecteuclid.org/euclid.ba/1340371077]
-theta = q_theta.sample(nb_mc_samps)
-pi = [theta[:, k] * tf.reduce_prod(1. - theta[:, :k], axis=1) for k in range(K - 1)]
-pi += [1. - tf.reduce_sum(pi, axis=0)]
-pi = tf.transpose(tf.stack(pi))
-
-# Specify variational distributions corresponding to the parameters of the mixture components
 q_mu = [
     tfd.Normal(
         loc=q_parms_dict['mu']['mean'][k],
@@ -80,7 +70,13 @@ q_tau = [
     ) for k in range(K)
 ]
 
-# Specify likelihood
+# Draw samples from q(theta) and construct pi
+theta = q_theta.sample(nb_mc_samps)
+pi = [theta[:, k] * tf.reduce_prod(1. - theta[:, :k], axis=1) for k in range(K - 1)]
+pi += [1. - tf.reduce_sum(pi, axis=0)]
+pi = tf.transpose(tf.stack(pi))
+
+# Specify the likelihood
 p_x = tfd.Mixture(
     cat=tfd.Categorical(probs=pi),
     components=[
@@ -91,7 +87,7 @@ p_x = tfd.Mixture(
     ]
 )
 
-# Calculate ELBO
+# Calculate the ELBO
 p_dict = {'theta': p_theta, 'mu': p_mu, 'tau': p_tau}
 q_dict = {'theta': [q_theta], 'mu': q_mu, 'tau': q_tau}
 pq_pairs = zip(p_dict.values(), q_dict.values())
