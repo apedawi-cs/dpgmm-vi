@@ -80,18 +80,15 @@ q_tau = [
     ) for k in range(K)
 ]
 
-# Specify variational distributions corresponding to the mixture components
-q_z = [
-    tfd.Normal(
-        loc=q_mu[k].sample(nb_mc_samps),
-        scale=tf.exp(-tf.log(q_tau[k].sample(nb_mc_samps)) / 2.)
-    ) for k in range(K)
-]
-
 # Specify likelihood
 p_x = tfd.Mixture(
     cat=tfd.Categorical(probs=pi),
-    components=q_z
+    components=[
+        tfd.Normal(
+            loc=q_mu[k].sample(nb_mc_samps),
+            scale=tf.exp(-tf.log(q_tau[k].sample(nb_mc_samps)) / 2.)
+        ) for k in range(K)
+    ]
 )
 
 # Calculate ELBO
